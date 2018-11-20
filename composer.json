@@ -1,0 +1,42 @@
+{
+    "name": "sander/social-media-aggregator-youtube-plugin",
+    "description": "Youtube Plugin for Milosa Social Media Aggregator",
+    "type": "library",
+    "require": {
+        "php": "^7.2",
+        "ext-json": "*",
+        "milosa/social-media-aggregator-bundle": "dev-master",
+        "guzzlehttp/guzzle": "~6.0",
+        "guzzlehttp/psr7": "~1.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.4"
+    },
+    "license": "MPL-2.0",
+    "authors": [
+        {
+            "name": "sander",
+            "email": "sander3@gmail.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../social-media-aggregator"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload" : {
+        "psr-4" : {
+            "Milosa\\SocialMediaAggregatorBundle\\Youtube\\" : "src/"
+        },
+        "exclude-from-classmap": [
+            "/tests/"
+        ]
+    },
+    "autoload-dev" : {
+        "psr-4" : {
+            "Milosa\\SocialMediaAggregatorTests\\Twitter\\": "tests/"
+        }
+    }
+}
