@@ -1,5 +1,5 @@
 {
-    "name": "sander/social-media-aggregator-youtube-plugin",
+    "name": "milosa/social-media-aggregator-youtube-plugin",
     "description": "Youtube Plugin for Milosa Social Media Aggregator",
     "type": "library",
     "require": {
