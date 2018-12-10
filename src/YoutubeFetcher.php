@@ -4,19 +4,16 @@ declare(strict_types=1);
 
 namespace Milosa\SocialMediaAggregatorBundle\Youtube;
 
-use GuzzleHttp\Client;
+use Milosa\SocialMediaAggregatorBundle\Aggregator\ClientWrapper;
 use Milosa\SocialMediaAggregatorBundle\Aggregator\Fetcher;
 
 class YoutubeFetcher extends Fetcher
 {
     private const CACHE_KEY = 'youtube_videos';
 
-    public function __construct(Client $client, string $channelId, int $numberOfVideos, string $apiKey)
+    public function __construct(ClientWrapper $client, array $config)
     {
-        $this->client = $client;
-        $this->channelId = $channelId;
-        $this->numberOfVideos = $numberOfVideos;
-        $this->apiKey = $apiKey;
+        parent::__construct($client, $config);
     }
 
     /**
@@ -62,8 +59,14 @@ class YoutubeFetcher extends Fetcher
      */
     private function getVideosFromAPI(): array
     {
-        $res = $this->client->request('GET',
-            'https://www.googleapis.com/youtube/v3/search?part=snippet,id&channelId='.$this->channelId.'&maxResults='.$this->numberOfVideos.'&order=date&type=video&key='.$this->apiKey);
+//        $res = $this->client->request('GET',
+//            'https://www.googleapis.com/youtube/v3/search?part=snippet,id&channelId='.$this->channelId.'&maxResults='.$this->numberOfVideos.'&order=date&type=video&key='.$this->apiKey);
+
+        $res = $this->client->get('', [
+            'channelId' => $this->config['search_term'],
+            'maxResults' => $this->config['number_of_videos'],
+            'order' => 'date']);
+
         $result = json_decode($res->getBody()->getContents());
         $result->items = $this->injectSource($result->items, 'API');
 

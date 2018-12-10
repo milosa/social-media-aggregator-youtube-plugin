@@ -8,6 +8,7 @@ use Milosa\SocialMediaAggregatorBundle\MilosaSocialMediaAggregatorPlugin;
 use Milosa\SocialMediaAggregatorBundle\Youtube\DependencyInjection\YoutubePluginExtension;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
+use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
@@ -21,9 +22,19 @@ class YoutubePlugin extends Bundle implements MilosaSocialMediaAggregatorPlugin
         return 'youtube';
     }
 
-    public function getTwigPath(): string
+    public function getResourcesPath(): string
     {
-        return realpath(__DIR__.'/../Resources/views');
+        return realpath(__DIR__.'/../Resources');
+    }
+
+    public function load(array $config, ContainerBuilder $container): void
+    {
+        $extension = new YoutubePluginExtension();
+        $extension->load($config, $container);
+        $this->setContainerParameters($config, $container);
+        $this->configureCaching($config, $container);
+        $this->registerHandler($container);
+        $this->addFetchers($config, $container);
     }
 
     public function addConfiguration(ArrayNodeDefinition $pluginNode): void
@@ -38,21 +49,44 @@ class YoutubePlugin extends Bundle implements MilosaSocialMediaAggregatorPlugin
                     ->scalarNode('api_key')->defaultNull()->end()
                 ->end()
             ->end()
+            ->arrayNode('sources')
+                ->isRequired()
+                ->requiresAtLeastOneElement()
+                ->arrayPrototype()
+                    ->children()
+                        ->enumNode('search_type')->values(['channel'])->defaultValue('profile')->end()
+                        ->scalarNode('search_term')->isRequired()->end()
+                        ->integerNode('number_of_videos')->defaultValue(10)->end()
+                    ->end()
+                ->end()
+            ->end()
             ->booleanNode('enable_cache')->defaultFalse()->end()
             ->integerNode('cache_lifetime')->info('Cache lifetime in seconds')->defaultValue(3600)->end()
-            ->integerNode('number_of_items')->defaultValue(10)->end()
-            ->scalarNode('channel_id')->defaultNull()->info('Channel id of youtube channel. Click on the name of a channel when viewing a youtube video. You\'ll find the channel-id in the URL.')->end()
             ->scalarNode('template')->defaultValue('youtube.twig')->end()
         ->end();
     }
 
-    public function load(array $config, ContainerBuilder $container): void
+    private function addFetchers(array $config, ContainerBuilder $container): void
     {
-        $extension = new YoutubePluginExtension();
-        $extension->load($config, $container);
-        $this->setContainerParameters($config, $container);
-        $this->configureCaching($config, $container);
-        $this->registerHandler($container);
+        $fetchers = [];
+
+        foreach ($config['plugins']['youtube']['sources'] as $source) {
+            $fetcher = new ChildDefinition('milosa_social_media_aggregator.fetcher.youtube.abstract');
+
+            $fetcherSettings = [
+                'search_term' => $source['search_term'],
+                'number_of_videos' => $source['number_of_videos'],
+                'search_type' => $source['search_type'],
+            ];
+
+            $fetcher->setArgument(1, $fetcherSettings);
+            $container->setDefinition('milosa_social_media_aggregator.fetcher.youtube.'.$source['search_term'], $fetcher);
+
+            $fetchers[] = $fetcher;
+        }
+
+        $handlerDefinition = $container->findDefinition('milosa_social_media_aggregator.handler.youtube');
+        $handlerDefinition->setArgument(0, $fetchers);
     }
 
     private function registerHandler(ContainerBuilder $container): void
@@ -63,8 +97,6 @@ class YoutubePlugin extends Bundle implements MilosaSocialMediaAggregatorPlugin
 
     public function setContainerParameters(array $config, ContainerBuilder $container): void
     {
-        $container->setParameter('milosa_social_media_aggregator.youtube_channel_id', $config['plugins']['youtube']['channel_id']);
-        $container->setParameter('milosa_social_media_aggregator.youtube_number_of_items', $config['plugins']['youtube']['number_of_items']);
         $container->setParameter('milosa_social_media_aggregator.youtube_api_key', $config['plugins']['youtube']['auth_data']['api_key']);
     }
 
