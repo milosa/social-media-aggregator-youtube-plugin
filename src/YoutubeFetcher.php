@@ -65,7 +65,7 @@ class YoutubeFetcher extends Fetcher
         $res = $this->client->get('', [
             'channelId' => $this->config['search_term'],
             'maxResults' => $this->config['number_of_videos'],
-            'order' => 'date']);
+            'order' => 'date', ]);
 
         $result = json_decode($res->getBody()->getContents());
         $result->items = $this->injectSource($result->items, 'API');

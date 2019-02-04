@@ -6,6 +6,7 @@ namespace Milosa\SocialMediaAggregatorBundle\Youtube;
 
 use Milosa\SocialMediaAggregatorBundle\MilosaSocialMediaAggregatorPlugin;
 use Milosa\SocialMediaAggregatorBundle\Youtube\DependencyInjection\YoutubePluginExtension;
+use function realpath;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\DependencyInjection\ChildDefinition;
@@ -13,7 +14,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use function realpath;
 
 class YoutubePlugin extends Bundle implements MilosaSocialMediaAggregatorPlugin
 {

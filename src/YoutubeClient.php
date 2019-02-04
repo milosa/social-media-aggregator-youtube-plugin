@@ -1,8 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Milosa\SocialMediaAggregatorBundle\Youtube;
-
 
 use GuzzleHttp\Client;
 use Milosa\SocialMediaAggregatorBundle\Aggregator\ClientWrapper;
@@ -15,8 +15,7 @@ class YoutubeClient implements ClientWrapper
 
     public function __construct(array $config)
     {
-        if(!isset($config['api_key']))
-        {
+        if (!isset($config['api_key'])) {
             throw new \InvalidArgumentException('api_key is required');
         }
 
@@ -27,12 +26,11 @@ class YoutubeClient implements ClientWrapper
     public function get(string $uri, array $queryParameters = []): ResponseInterface
     {
         return $this->client->get('https://www.googleapis.com/youtube/v3/search', [
-            'query' =>
-                array_merge([
+            'query' => array_merge([
                     'key' => $this->apiKey,
                     'part' => 'snippet,id',
-                    'type' => 'video'],
-                    $queryParameters)
+                    'type' => 'video', ],
+                    $queryParameters),
         ]);
     }
 }

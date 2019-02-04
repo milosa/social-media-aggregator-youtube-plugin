@@ -10,6 +10,9 @@ use PHPUnit\Framework\TestCase;
 
 class YoutubeMessageFactoryTest extends TestCase
 {
+    /**
+     * @var string[]
+     */
     private $sampleVideoJson = [
         '{ "kind": "youtube#searchResult", "etag": "\"XI7nbFXulYBIpL0ayR_gDh3eu1k/m1XFDOtSGQ8s0rj8i6Qq8qN5M4Y\"", "id": { "kind": "youtube#video", "videoId": "UGozHiOXfCI" }, "snippet": { "publishedAt": "2018-09-02T16:43:37.000Z", "channelId": "UCLA_DiR1FfKNvjuUpBHmylQ", "title": "NASA Live: Earth Views from the Space Station", "description": "Behold, the Earth! See live views of Earth from the International Space Station coming to you by NASA\'s High Definition Earth Viewing (HDEV) experiment.", "thumbnails": { "default": { "url": "https://i.ytimg.com/vi/UGozHiOXfCI/default_live.jpg", "width": 120, "height": 90 }, "medium": { "url": "https://i.ytimg.com/vi/UGozHiOXfCI/mqdefault_live.jpg", "width": 320, "height": 180 }, "high": { "url": "https://i.ytimg.com/vi/UGozHiOXfCI/hqdefault_live.jpg", "width": 480, "height": 360 } }, "channelTitle": "NASA", "liveBroadcastContent": "live" } }',
     ];

@@ -29,7 +29,7 @@ class YoutubePluginTest extends TestCase
 
     public function testGetTwigPath(): void
     {
-        $this->assertEquals(DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'views', mb_substr($this->plugin->getTwigPath(), -16));
+        $this->assertEquals(\DIRECTORY_SEPARATOR.'Resources'.\DIRECTORY_SEPARATOR.'views', mb_substr($this->plugin->getTwigPath(), -16));
     }
 
     public function testLoad(): void
@@ -114,7 +114,7 @@ class YoutubePluginTest extends TestCase
 
 class DummyAggregator
 {
-    public function addHandler(Handler $handler)
+    public function addHandler(Handler $handler): void
     {
     }
 }
