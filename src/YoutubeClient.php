@@ -11,6 +11,10 @@ use Psr\Http\Message\ResponseInterface;
 class YoutubeClient implements ClientWrapper
 {
     private $apiKey;
+
+    /**
+     * @var Client
+     */
     private $client;
 
     public function __construct(array $config)

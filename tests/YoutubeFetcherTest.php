@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Milosa\SocialMediaAggregatorTests\Sites\Youtube;
 
-use GuzzleHttp\Client;
+use Milosa\SocialMediaAggregatorBundle\Youtube\YoutubeClient;
 use Milosa\SocialMediaAggregatorBundle\Youtube\YoutubeFetcher;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Cache\CacheItemInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -17,49 +18,55 @@ class YoutubeFetcherTest extends TestCase
 {
     public function testItMakesCorrectAPICalls(): void
     {
-        $streamProphecy = $this->prophesize(StreamInterface::class);
-        $streamProphecy->getContents()->willReturn('{"items" : [ {"kind": "youtube#searchResult"}, {"kind": "youtube#searchResult"} ] }')->shouldBeCalledTimes(1);
+        $clientWrapper = $this->createClientStub(
+            '{"items": [] }',
+            [
+                'channelId' => 'test_name',
+                'maxResults' => 10,
+                'order' => 'date',
+        ]);
 
-        $responseProphecy = $this->prophesize(ResponseInterface::class);
-        $responseProphecy->getBody()->willReturn($streamProphecy->reveal())->shouldBeCalledTimes(1);
-
-        $clientProphecy = $this->prophesize(Client::class);
-        $clientProphecy->request(
-            Argument::exact('GET'),
-            Argument::exact('https://www.googleapis.com/youtube/v3/search?part=snippet,id&channelId=test_id&maxResults=10&order=date&type=video&key=test_key'))
-        ->willReturn($responseProphecy->reveal())
-        ->shouldBeCalledTimes(1);
-
-        $fetcher = new YoutubeFetcher($clientProphecy->reveal(), 'test_id', 10, 'test_key');
+        $fetcher = new YoutubeFetcher(
+            $clientWrapper->reveal(),
+            [
+            'search_term' => 'test_name',
+            'number_of_videos' => 10,
+            ]);
         $fetcher->fetch();
     }
 
     public function testWhenAPIReturnsTwoVideosFetchReturnsArrayWithTwoJsonStrings(): void
     {
-        $streamProphecy = $this->prophesize(StreamInterface::class);
-        $streamProphecy->getContents()->willReturn('{"items" : [ {"id": "123"}, {"id": "456"} ] }')->shouldBeCalledTimes(1);
+        $clientWrapper = $this->createClientStub(
+            '{"items" : [ {"id": "123"}, {"id": "456"} ] }',
+            [
+                'channelId' => 'test_name',
+                'maxResults' => 2,
+                'order' => 'date',
+            ]);
 
-        $responseProphecy = $this->prophesize(ResponseInterface::class);
-        $responseProphecy->getBody()->willReturn($streamProphecy->reveal())->shouldBeCalledTimes(1);
-
-        $clientProphecy = $this->prophesize(Client::class);
-        $clientProphecy->request(
-            Argument::exact('GET'),
-            Argument::exact('https://www.googleapis.com/youtube/v3/search?part=snippet,id&channelId=test_id&maxResults=10&order=date&type=video&key=test_key'))
-            ->willReturn($responseProphecy->reveal())
-            ->shouldBeCalledTimes(1);
-
-        $fetcher = new YoutubeFetcher($clientProphecy->reveal(), 'test_id', 10, 'test_key');
+        $fetcher = new YoutubeFetcher(
+            $clientWrapper->reveal(),
+            [
+                'search_term' => 'test_name',
+                'number_of_videos' => 2,
+            ]
+            );
 
         $this->assertEquals(['{"id":"123","fetchSource":"API"}', '{"id":"456","fetchSource":"API"}'], $fetcher->fetch());
     }
 
     public function testWhenCacheIsEnabledAndHitItGetsDataFromCache(): void
     {
-        $clientProphecy = $this->prophesize(Client::class);
-        $clientProphecy->request(Argument::any())->shouldNotBeCalled();
+        $clientWrapper = $this->createClientDummy();
+        $clientWrapper->get(Argument::Any())->shouldNotBeCalled();
 
-        $fetcher = new YoutubeFetcher($clientProphecy->reveal(), 'test_id', 10, 'test_key');
+        $fetcher = new YoutubeFetcher(
+            $clientWrapper->reveal(),
+            [
+                'search_term' => 'test_name',
+                'number_of_videos' => 2,
+            ]);
 
         $cacheItem = $this->prophesize(CacheItemInterface::class);
         $cacheItem->isHit()->willReturn(true)->shouldBeCalledTimes(1);
@@ -83,20 +90,21 @@ class YoutubeFetcherTest extends TestCase
 
     public function testWhenCacheIsEnabledAndCacheDoesntGetHitItGetsDataFromAPI(): void
     {
-        $streamProphecy = $this->prophesize(StreamInterface::class);
-        $streamProphecy->getContents()->willReturn('{"items" : [ {"id": "123"}, {"id": "456"} ] }')->shouldBeCalledTimes(1);
+        $clientWrapper = $this->createClientStub(
+            '{"items" : [ {"id": "123"}, {"id": "456"} ] }',
+            [
+                'channelId' => 'test_name',
+                'maxResults' => 2,
+                'order' => 'date',
+            ]);
 
-        $responseProphecy = $this->prophesize(ResponseInterface::class);
-        $responseProphecy->getBody()->willReturn($streamProphecy->reveal())->shouldBeCalledTimes(1);
-
-        $clientProphecy = $this->prophesize(Client::class);
-        $clientProphecy->request(
-            Argument::exact('GET'),
-            Argument::exact('https://www.googleapis.com/youtube/v3/search?part=snippet,id&channelId=test_id&maxResults=10&order=date&type=video&key=test_key'))
-            ->willReturn($responseProphecy->reveal())
-            ->shouldBeCalledTimes(1);
-
-        $fetcher = new YoutubeFetcher($clientProphecy->reveal(), 'test_id', 10, 'test_key');
+        $fetcher = new YoutubeFetcher(
+            $clientWrapper->reveal(),
+            [
+                'search_term' => 'test_name',
+                'number_of_videos' => 2,
+            ]
+        );
 
         $class1 = new \stdClass();
         $class1->id = 123;
@@ -121,6 +129,38 @@ class YoutubeFetcherTest extends TestCase
         $this->assertEquals(['{"id":"123","fetchSource":"API"}', '{"id":"456","fetchSource":"API"}'], $fetcher->fetch());
     }
 
-    //todo: make it so that fetch source is NOT stored in the cache itself
-    //todo: check that ints are stored as ints in cache.
+    /**
+     * @param string $responseBody
+     * @param array  $queryParameters
+     *
+     * @return YoutubeClient|ObjectProphecy
+     */
+    private function createClientStub(string $responseBody, array $queryParameters)
+    {
+        $stream = $this->prophesize(StreamInterface::class);
+        $stream->getContents()->willReturn($responseBody);
+        $response = $this->prophesize(ResponseInterface::class);
+        $response->getBody()->willReturn($stream->reveal());
+
+        /** @var YoutubeClient|ObjectProphecy $clientWrapper */
+        $clientWrapper = $this->createClientDummy();
+        $clientWrapper->get(
+            Argument::exact(''),
+            Argument::exact($queryParameters))
+            ->willReturn($response->reveal())
+            ->shouldBeCalledTimes(1);
+
+        return $clientWrapper;
+    }
+
+    /**
+     * @return ObjectProphecy
+     */
+    private function createClientDummy(): ObjectProphecy
+    {
+        $clientWrapper = $this->prophesize(YoutubeClient::class);
+        $clientWrapper->willBeConstructedWith([['api_key' => 'test_key']]);
+
+        return $clientWrapper;
+    }
 }

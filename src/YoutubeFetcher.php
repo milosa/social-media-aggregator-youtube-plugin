@@ -59,9 +59,6 @@ class YoutubeFetcher extends Fetcher
      */
     private function getVideosFromAPI(): array
     {
-//        $res = $this->client->request('GET',
-//            'https://www.googleapis.com/youtube/v3/search?part=snippet,id&channelId='.$this->channelId.'&maxResults='.$this->numberOfVideos.'&order=date&type=video&key='.$this->apiKey);
-
         $res = $this->client->get('', [
             'channelId' => $this->config['search_term'],
             'maxResults' => $this->config['number_of_videos'],

@@ -15,9 +15,6 @@
 
         <service id="milosa_social_media_aggregator.fetcher.youtube.abstract" abstract="true" class="Milosa\SocialMediaAggregatorBundle\Youtube\YoutubeFetcher">
             <argument type="service" id="milosa_social_media_aggregator.client.youtube"/>
-            <!--<argument>%milosa_social_media_aggregator.youtube_channel_id%</argument>-->
-            <!--<argument>%milosa_social_media_aggregator.youtube_number_of_items%</argument>-->
-            <!--<argument>%milosa_social_media_aggregator.youtube_api_key%</argument>-->
         </service>
 
         <service id="milosa_social_media_aggregator.handler.youtube" class="Milosa\SocialMediaAggregatorBundle\Aggregator\Handler">

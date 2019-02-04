@@ -27,21 +27,17 @@ class YoutubePluginTest extends TestCase
         $this->assertEquals('youtube', $this->plugin->getPluginName());
     }
 
-    public function testGetTwigPath(): void
+    public function testGetResourcesPath(): void
     {
-        $this->assertEquals(\DIRECTORY_SEPARATOR.'Resources'.\DIRECTORY_SEPARATOR.'views', mb_substr($this->plugin->getTwigPath(), -16));
+        $this->assertEquals(\DIRECTORY_SEPARATOR.'Resources', mb_substr($this->plugin->getResourcesPath(), -10));
     }
 
     public function testLoad(): void
     {
         $container = $this->createContainer(false);
 
-        $this->assertTrue($container->hasParameter('milosa_social_media_aggregator.youtube_channel_id'));
-        $this->assertTrue($container->hasParameter('milosa_social_media_aggregator.youtube_number_of_items'));
         $this->assertTrue($container->hasParameter('milosa_social_media_aggregator.youtube_api_key'));
-
         $this->assertTrue($container->hasDefinition('milosa_social_media_aggregator.handler.youtube'));
-
         $this->assertFalse($container->hasDefinition('milosa_social_media_aggregator.youtube_cache'));
     }
 
@@ -50,7 +46,7 @@ class YoutubePluginTest extends TestCase
         $container = $this->createContainer(true);
 
         $this->assertTrue($container->hasDefinition('milosa_social_media_aggregator.youtube_cache'));
-        $this->assertTrue($container->getDefinition('milosa_social_media_aggregator.fetcher.youtube')->hasMethodCall('setCache'));
+        $this->assertTrue($container->getDefinition('milosa_social_media_aggregator.fetcher.youtube.abstract')->hasMethodCall('setCache'));
     }
 
     public function testAddConfiguration(): void
@@ -65,10 +61,9 @@ class YoutubePluginTest extends TestCase
             'auth_data' => [
                 'api_key' => null,
             ],
+            'sources' => [],
             'enable_cache' => false,
             'cache_lifetime' => 3600,
-            'number_of_items' => 10,
-            'channel_id' => null,
             'template' => 'youtube.twig',
         ],
             $node->getDefaultValue());
@@ -99,7 +94,13 @@ class YoutubePluginTest extends TestCase
                     'enable_cache' => $enableCache,
                     'cache_lifetime' => 123,
                     'number_of_items' => 42,
-                    'channel_id' => 'NASA',
+                    'sources' => [
+                        [
+                            'search_term' => 'NASA',
+                            'number_of_videos' => 10,
+                            'search_type' => 'channel',
+                        ],
+                    ],
                 ],
             ],
         ];

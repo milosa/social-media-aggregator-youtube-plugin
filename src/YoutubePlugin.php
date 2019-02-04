@@ -110,7 +110,7 @@ class YoutubePlugin extends Bundle implements MilosaSocialMediaAggregatorPlugin
             ]);
 
             $container->setDefinition('milosa_social_media_aggregator.youtube_cache', $cacheDefinition)->addTag('cache.pool');
-            $fetcherDefinition = $container->getDefinition('milosa_social_media_aggregator.fetcher.youtube');
+            $fetcherDefinition = $container->getDefinition('milosa_social_media_aggregator.fetcher.youtube.abstract');
             $fetcherDefinition->addMethodCall('setCache', [new Reference('milosa_social_media_aggregator.youtube_cache')]);
         }
     }
