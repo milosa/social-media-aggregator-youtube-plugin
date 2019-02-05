@@ -15,7 +15,7 @@ class YoutubeClient implements ClientWrapper
     /**
      * @var Client
      */
-    private $client;
+    protected $client;
 
     public function __construct(array $config)
     {

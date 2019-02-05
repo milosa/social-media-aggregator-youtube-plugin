@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Milosa\SocialMediaAggregatorTests\Sites\Youtube;
+namespace Milosa\SocialMediaAggregatorTests\Youtube;
 
 use Milosa\SocialMediaAggregatorBundle\Youtube\YoutubeMessage;
 use Milosa\SocialMediaAggregatorBundle\Youtube\YoutubeMessageFactory;
